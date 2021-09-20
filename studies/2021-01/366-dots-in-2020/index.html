@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html>
+
+
+<head>
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-155186973-1"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-155186973-1');
+	</script>
+
+	<meta charset="utf-8">
+    <title>366 dots in 2020: Top news stories of 2020</title>
+    <link rel="stylesheet" href="/storygraph/static/365-dots-in-2018/style.css">
+    <link rel="stylesheet" href="/storygraph/static/pure-min.css">
+    <link rel="stylesheet" href="/storygraph/static/grids-responsive-min.css">
+
+    <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-1.11.0.css">
+    <script src="https://code.jquery.com/qunit/qunit-1.11.0.js"></script>
+
+    <style type="text/css">
+    		path { 
+			    stroke: steelblue;
+			    stroke-width: 2;
+			    fill: none;
+			}
+
+    	  .bar {
+		    fill: #3383FF;
+		  }
+
+		  .bar:hover {
+		    fill: orangered ;
+		  }
+
+		  .x.axis path {
+		    /*display: none;*/
+		  }
+
+		  .d3-tip {
+		    line-height: 1;
+		    font-weight: bold;
+		    padding: 12px;
+		    background: rgba(0, 0, 0, 0.8);
+		    color: #fff;
+		    border-radius: 2px;
+		  }
+
+		  /* Creates a small triangle extender for the tooltip */
+		  .d3-tip:after {
+		    box-sizing: border-box;
+		    display: inline;
+		    font-size: 10px;
+		    width: 100%;
+		    line-height: 1;
+		    color: rgba(0, 0, 0, 0.8);
+		    content: "\25BC";
+		    position: absolute;
+		    text-align: center;
+		  }
+
+		  /* Style northward tooltips differently */
+		  .d3-tip.n:after {
+		    margin: -1px 0 0 0;
+		    top: 100%;
+		    left: 0;
+		  }
+
+		  .chart1{
+		  	width: 80%;
+		  	margin: 0px auto;
+		  }
+		  
+    </style>
+</head>
+
+<body>
+	
+	<ul class="nav">
+	  <li><a href="/storygraph/">Home</a></li>
+	  <li><a href="/storygraph/graphs/polar-media-consensus-graph/" target="_blank">USA</a></li>
+	  <!--<li><a href="/storygraph/graphs/generic/" target="_blank">Generic Graphs</a></li>-->
+	  <li><a href="/storygraph/studies/">Studies</a></li>
+	  <li><a href="/storygraph/stats/">Stats</a></li>
+	  <li><a href="https://twitter.com/intent/user?screen_name=storygraphbot" target="_blank">Follow @storygraphbot</a></li>
+	</ul>
+
+	<div style="margin: auto; width: 95%; text-align:center;">
+        <h3 style="margin: 10px 0 0 0;">
+        	366 dots in 2020
+        </h3>
+        <h4 style="margin: 0 0 0 0;">(<a href="https://ws-dl.blogspot.com/2021/01/2020-01-20-366-dots-in-2020-top-news.html" target="_blank">Explanation</a>, <a href="/storygraph/static/366-dots-in-2020/366-dots-in-2020.json" target="_blank">Dataset</a>, Hover for details, click dot to visit story graph)</h4>
+    </div>
+	
+	<div style="margin: auto;width: 95%; text-align:center;">
+        <span id="alertMessage0">Hover or click dots</span>
+    </div>
+	
+	<div class="pure-form pure-form-stacked" style="margin:auto; width:95%; display:none;" id="advMenu">   
+        <br><strong><legend style="text-align:center">Settings</legend></strong><br>
+        <fieldset>
+        	<div class="pure-g">
+
+        		<div class="pure-u-1 pure-u-md-1-4">
+		            <input type="checkbox" checked value="show-col-labels" onclick="toggleLabels(this)"> Show labels<br>
+		        </div>
+
+        	</div>
+        </fieldset>
+
+    </div>
+	
+	<hr class="style13">
+	<div class="section">
+		<div id='chart1'>
+		</div>
+	</div>
+
+	
+    <!--
+	<hr class="style13">
+	<div style="margin: auto;width: 95%; text-align:center;">
+        <span id="alertMessage1">Hover or click dots</span>
+    </div>
+	<div class="section">
+		<div id='chart2'>
+		</div>
+	</div>
+    -->
+    
+	
+
+    <script src="/storygraph/static/d3.v3.min.js"></script>
+    <script src="/storygraph/static/d3.tip.v0.6.3.js"></script>
+    <script>
+    	
+    	var globalTermCounters = [
+    		{
+    			term: ['corona', 'covid'],
+    			color: 'orange',
+    			count: 0
+    		},
+    		{
+    			term: ['protest'],
+    			color: 'blue',
+    			count: 0
+    		}
+    	];
+		main();
+		
+		function main()
+    	{
+    		console.log('\nmain()');
+
+    		var parseDate = d3.time.format("%Y-%m-%d").parse;
+
+			d3.json('/storygraph/static/366-dots-in-2020/366-dots-in-2020.json', function(error, report)
+    		{
+    			if( error )
+    			{
+    				console.log('error:', error, report);
+    				return;
+    			}
+
+    			var payload = getChart1Dat(report.max_graphs);
+    			drawChart1( payload.chart );
+                //enumerateTopStories( JSON.parse(JSON.stringify(payload.chart)) );
+    		});
+
+			/*
+    		d3.json('/storygraph/static/366-dots-in-2020/2020_clustered_stories_lite.json', function(error, report)
+    		{
+    			if( error )
+    			{
+    				console.log('error:', error, report);
+    				return;
+    			}
+
+    			var payload = getChart2Dat(report, 1);
+    			drawChart2( payload.chart );
+    		});
+            */
+    	}
+
+        function enumerateTopStories(chrtDat)
+        {
+
+            var cmp = function(a, b)
+            {
+                if( a.yPos > b.yPos )
+                {
+                    return -1;
+                }
+                else if( a.yPos < b.yPos )
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            };
+            chrtDat[0].sort(cmp);
+            for(var i=0; i<chrtDat[0].length; i++)
+            {
+                chrtDat[0][i].xPos = i+1;
+            }
+            
+            
+            console.log('To track top news stories (commented out)');
+            console.log('dots:', chrtDat[0].length );
+            
+            for(var i=0; i<50; i++)
+            {
+                console.log( chrtDat[0][i] );
+            }
+            console.log('');
+        }   
+
+    	function drawChart1(chrtDat)
+    	{
+    		var params = {};
+			params.chartAnchor = '#chart1';
+			params.xScaleRange = 'time';
+			params.lineWidth = 0;
+			params.xAxisLabel = '';
+			params.yAxisLabel = 'average degree (attention score)';
+
+			params.chartTitle = '1 day = 1 dot. 1 dot = average degree of Connected Component with largest average degree (top story) across all story graphs.'
+
+			params.legend = [
+				{class: '2020 US Presidential Elections', shape: 'circle', color: 'red'},
+				{class: 'Trump nominates Barrett to Supreme Court', shape: 'circle', color: 'green'},
+				{class: 'Death of Justice Ginsberg', shape: 'circle', color: 'fuchsia'},
+                {class: 'US assassinates Qassem Soleimani', shape: 'circle', color: 'lime'},
+				{class: 'Protests in title (39 days)', shape: 'circle', color: 'blue'},
+				{class: 'Coronavirus in title (177 days)', shape: 'circle', color: 'orange'}
+			];
+
+			console.log('\ndrawChart1():');
+			genericLineChartVarGlyph(chrtDat, 'alertMessage0', params);
+    	}
+
+    	function drawChart2(chrtDat)
+    	{
+    		console.log('\ndrawChart2():');
+            //console.log('\treturning:', chrtDat);
+            //return;
+
+    		let params = {};
+			params.chartAnchor = '#chart2';
+			//params.xScaleRange = 'time';
+			params.lineWidth = 0.5;
+			params.customHeight = 650;
+			params.xAxisLabel = 'Stories';
+			params.yAxisLabel = 'Single day (minutes)';
+
+			params.chartTitle = 'xx';
+
+			let cmp = function(a, b)
+			{
+
+				let aMinuteDiff = a[0].graphCount;//Math.abs( a[1].yPos - a[0].yPos ) * Math.abs( a[1].avgDegree - a[0].avgDegree );
+				let bMinuteDiff = b[0].graphCount;//Math.abs( b[1].yPos - b[0].yPos ) * Math.abs( b[1].avgDegree - b[0].avgDegree );
+
+				if( aMinuteDiff > bMinuteDiff )
+				{
+					return -1;
+				}
+				else if( aMinuteDiff < bMinuteDiff )
+				{
+					return 1;
+				}
+				else
+				{
+					return 0;
+				}
+			};
+			chrtDat.sort(cmp);
+			
+			let offset = 0;
+			for(let i=0; i<chrtDat.length; i++)
+			{
+				if( i<100 )
+				{
+					offset += 5;
+					//chrtDat[i][0].size = 10;
+					//chrtDat[i][1].size = 10;
+				}
+				chrtDat[i][0].xPos = offset + i+1;
+				chrtDat[i][1].xPos = offset + i+1;
+			}
+
+			/*params.legend = [
+				{class: 'General', shape: 'diamond', color: 'blue'},
+				{class: 'News Vertical', shape: 'square', color: 'orange'}
+			];*/			
+			
+			console.log('\t\tpoints:', chrtDat[0]);
+			console.log('\t\tpoints:', chrtDat[chrtDat.length-1]);
+			genericLineChartVarGlyph(chrtDat, 'alertMessage1', params);
+    	}
+
+    	function countTerms(record, srchKey, termCounter)
+    	{
+            let foundFlag = false;
+
+    		for(let j=0; j<termCounter.length; j++)
+			{
+				for(let k=0; k<termCounter[j].term.length; k++)
+				{	
+					if( srchKey.indexOf( termCounter[j].term[k] ) != -1 )
+					{	
+						termCounter[j].count += 1;
+                        if( record.max_connected_comp_dets.color == undefined )
+                        {
+						  record.max_connected_comp_dets.color = termCounter[j].color;
+                        }
+                        foundFlag = true;
+						break;
+					}
+				}
+			}
+
+			return foundFlag;
+    	}
+
+    	function getChart1Dat(report)
+    	{
+    		var points1 = [[]];
+
+    		var dayCounter = 0;
+			var dates = Object.keys(report).sort(); 
+
+			for(var i=0; i<dates.length; i++)
+			{
+				var date = dates[i];
+				let rep = report[date].graphs[0];
+
+				dayCounter += 1;
+				var point1 = 
+				{
+					xPos: d3.time.format("%Y-%m-%d").parse(date),
+					uri: rep.graph_uri,
+					tooltip: rep.max_connected_comp_dets.max_node_title,
+					yPos: rep.avg_degree,
+					shape: shapeMap( rep.max_connected_comp_dets ),
+					maxNodeId: rep.max_connected_comp_dets.max_node_id,
+					date: date
+				};
+
+                //let srchKey = rep.max_connected_comp_dets.max_node_title.toLowerCase();
+                //let foundFlag = countTerms(rep, srchKey, globalTermCounters);
+
+                for( let j=0; j<rep.max_connected_comp_dets.connected_comp_uris.length; j++ )
+                {
+                    let srchKey = rep.max_connected_comp_dets.connected_comp_uris[j].title;
+                    srchKey = srchKey.trim().toLowerCase();
+                    if( srchKey.length == 0 )
+                    {
+                        continue;
+                    }
+
+                    let foundFlag = countTerms(rep, srchKey, globalTermCounters);
+
+                    if( foundFlag == true )
+                    {
+                        break;
+                    }
+                }
+
+				point1.tooltip = date + ' (avg. deg: ' + point1.yPos.toFixed(2) + '): ' + point1.tooltip;
+				point1.color = colorMap( rep.max_connected_comp_dets, point1.yPos );
+
+                if( point1.uri == 'https://storygraph.cs.odu.edu/graphs/polar-media-consensus-graph/#cursor=57&hist=1440&t=2020-10-08T09:36:43' )
+                {
+                    point1.yPos += 0.2;
+                }
+
+				points1[0].push(point1);
+			}
+
+
+            console.log('globalTermCounters:', globalTermCounters);
+			return {
+				chart: points1
+			}
+    	}
+
+    	function getChart2Dat(report, maxTopStories)
+    	{
+    		console.log('\ngetChart2Dat():');
+
+    		let points = [
+    			/*[
+    				{
+    					xPos: 0,
+    					yPos: 0,
+                        shape: 'square'
+    				},
+    				{
+    					xPos: 1,
+    					yPos: 1,
+                        shape: 'square'
+    				}
+    			]*/
+    		];
+    		let getTotalMinutes = function(datetime)
+    		{
+    			let pDate = d3.time.format("%Y-%m-%dT%X").parse(datetime);
+    			let totalMinutes = (pDate.getHours()*60) + pDate.getMinutes();
+    			return totalMinutes;
+    		};
+
+
+    		let counter = 0;
+    		for(let day in report.story_clusters)
+    		{
+
+    			if( day == '2020-01-01' )
+    			{
+    				console.log( 'day:', day, report.story_clusters[day].stories.length, 'stories' );
+    				console.log('\t', report.story_clusters[day], report.story_clusters[day].stories.length);
+    			}
+
+    			let xPos = d3.time.format("%Y-%m-%d").parse(day);
+    			for( let story=0; story<maxTopStories; story++ )
+    			{
+    				if( story == report.story_clusters[day].stories.length )
+    				{
+    					break;
+    				}
+
+    				let gCount = report.story_clusters[day].stories[story].graph_ids.length;
+					let firstY = report.story_clusters[day].stories[story].graph_ids[0];//.graph_uri_local_datetime;
+					let secondY = report.story_clusters[day].stories[story].graph_ids[gCount-1];//.graph_uri_local_datetime;
+    				    				
+                    
+    				let pnt0 = 
+					{
+						xPos: xPos,
+						uri: firstY.graph_uri,
+						tooltip: firstY.max_node_title,
+						avgDegree: firstY.avg_degree,
+						yPos: 0,//getTotalMinutes(firstY.graph_uri_local_datetime)
+						shape: 'circle',
+						date: day,
+						size: firstY.avg_degree,
+                        graphCount: report.story_clusters[day].stories[story].graph_count//same as secondY
+					};
+                    pnt0.tooltip = pnt0.date + ' (avg. deg: ' + pnt0.avgDegree.toFixed(2) + '): ' + pnt0.tooltip;
+
+					let pnt1 = 
+					{
+						xPos: xPos,
+						uri: secondY.graph_uri,
+						tooltip: secondY.max_node_title,
+						avgDegree: secondY.avg_degree,
+						yPos: report.story_clusters[day].stories[story].graph_count,//getTotalMinutes(secondY.graph_uri_local_datetime)
+						shape: 'circle',
+						date: day,
+						size: secondY.avg_degree,
+                        graphCount: report.story_clusters[day].stories[story].graph_count
+					};
+                    pnt1.tooltip = pnt1.date + ' (avg. deg: ' + pnt1.avgDegree.toFixed(2) + '): ' + pnt1.tooltip;
+					
+					//pnt1.color = colorMap( rep.max_connected_comp_dets, pnt1.yPos );
+
+					points.push([]);
+					points[points.length-1].push(pnt0);
+					points[points.length-1].push(pnt1);
+					
+    			}
+    		}
+    		
+    		return {
+				chart: points
+			};
+    	}
+
+    	function colorMap(pntDet, avgDeg)
+		{
+			/*
+				if( avgDeg >= 20 )
+				{
+					return 'red';
+				}
+				else if( avgDeg >= 15 )
+				{
+					return 'blue';
+				}
+				else if( avgDeg >= 10 )
+				{
+					return 'green';
+				}
+				else if( avgDeg >= 5 )
+				{
+					return 'orange';
+				}
+			*/
+			if( pntDet.color )
+			{
+				return pntDet.color;
+			}
+
+			return '#5e5e5e';
+		}
+
+		function shapeMap(pntDet)
+		{
+			if( pntDet.shape )
+			{
+				return pntDet.shape;
+			}
+
+			return 'circle';
+		}
+
+		function genericLineChartVarGlyph(data, altAnchor, params)
+		{
+			if( params == undefined )
+			{
+				params = {};
+			}
+
+			if( params.chartTitle == undefined )
+			{
+				params.chartTitle = 'chart title';
+			}
+
+			if( params.xAxisLabel == undefined )
+			{
+				params.xAxisLabel = 'x axis label';
+			}
+
+			if( params.yAxisLabel == undefined )
+			{
+				params.yAxisLabel = 'y axis label';
+			}
+
+		    if (params.customWidth == undefined)
+		    {
+		        params.customWidth = window.innerWidth;//1200;
+		    }
+
+		    if (params.customHeight == undefined)
+		    {
+		        params.customHeight = 550;
+		    }
+
+		    if (params.customLeftMargin == undefined)
+		    {
+		        params.customLeftMargin = 60;
+		    }
+
+		    if( params.chartAnchor == undefined )
+		    {
+		    	params.chartAnchor = 'body';
+		    }
+
+		    d3.select(params.chartAnchor).selectAll('*').remove();
+
+		     var margin = {
+		            top: 40,
+		            right: 50,
+		            bottom: 60,
+		            left: params.customLeftMargin
+		        },
+		    width = params.customWidth - margin.left - margin.right,
+		    height = params.customHeight - margin.top - margin.bottom;
+		    var lineWidth = 0;
+
+		    if( params.lineWidth )
+		    {
+		    	lineWidth = params.lineWidth;
+		    }
+		   	
+
+			var x;
+			var y;
+		    if( params.xScaleRange == undefined )
+		    {
+		    	x = d3.scale.linear().range([0, width]);
+		    }
+		    else if( params.xScaleRange == 'time' )
+		    {
+		    	x = d3.time.scale().range([0, width]);
+		    }
+
+		    if( params.yScaleRange == undefined )
+		    {
+		    	y = d3.scale.linear().range([height, 0]);
+		    }
+		    else if( params.yScaleRange == 'time' )
+		    {
+		    	y = d3.time.scale().range([height, 0]);
+		    }
+
+
+			// Define the axes
+			var xAxis = d3.svg.axis()
+				.scale(x)
+			    .orient("bottom");
+
+			if( params.xScaleRange == 'time' )
+			{
+				var monthNames = {
+					0: 'Jan',
+					1: 'Feb',
+					2: 'Mar',
+					3: 'Apr',
+					4: 'May',
+					5: 'Jun',
+					6: 'Jul',
+					7: 'Aug',
+					8: 'Sep',
+					9: 'Oct',
+					10: 'Nov',
+					11: 'Dec'
+				};
+				xAxis.tickFormat(function(d)
+				{
+					return monthNames[d.getMonth()];
+				});
+			}
+
+			var yAxis = d3.svg.axis().scale(y)
+			    .orient("left").ticks(5);
+			
+			var formatToolTip = function(str, maxSize)
+			{
+				if( str.length > maxSize )
+	        	{
+	        		str = str.substr(0, maxSize-3) + '...';
+	        	}
+				
+				return str;       	
+			};
+			//var tip = d3.tip().attr('class', 'd3-tip').offset([-10, 0]).html(function(d)
+			var tip = d3.tip().attr('class', 'd3-tip').offset([-10, 0]).html(function(d)
+		    {
+		    	if (d.htmlTooltip)
+		    	{
+		    		return d.htmlTooltip;
+		    	}
+		        else if (d.tooltip)
+		        {
+		            return formatToolTip(d.tooltip, 120);
+		        }
+
+		        return "<strong>Frequency:</strong> <span style='color:white'>" + d.yPos + "</span>";
+		    });
+
+			// Define the line
+			var valueline = d3.svg.line()
+			    .x(function(d) { return x(d.xPos); })
+			    .y(function(d) { return y(d.yPos); });
+
+			var alertMessage = document.getElementById(altAnchor);
+
+
+			// Scale the range of the data - start
+			if( params.yDomain )
+		    {
+		    	y.domain( params.yDomain );
+		    }
+		    else
+		    {
+		    	let yDomainMax = 0;
+		    	
+		    	for(let i=0; i<data.length; i++)
+		    	{
+		    		let curMax = d3.max(data[i], function(d) { return d.yPos; });	
+		    		if( curMax > yDomainMax )
+		    		{
+		    			yDomainMax = curMax;
+		    		}
+		    	}
+		    	
+		    	y.domain([0, yDomainMax]);
+		    }
+
+		    let xDomain;
+		    if( params.xDomain )
+		    {
+		    	x.domain( params.xDomain );
+		    }
+		    else
+		    {
+		    	xDomain = d3.extent(data[0], function(d) { return d.xPos; });
+		    	for(let i=1; i<data.length; i++)
+		    	{
+		    		let curxDomain = d3.extent(data[i], function(d) { return d.xPos; });
+		    		if( curxDomain[0] < xDomain[0] )
+		    		{
+		    			xDomain[0] = curxDomain[0];
+		    		}
+
+		    		if( curxDomain[1] > xDomain[1] )
+		    		{
+		    			xDomain[1] = curxDomain[1];
+		    		}
+		    	}
+
+		    	x.domain(xDomain);
+		    }
+		    // Scale the range of the data - end
+
+
+			// Adds the svg canvas
+			var svg = d3.select(params.chartAnchor)
+			    .append("svg")
+			    	.attr("width", '100%')
+			        //.attr("width", width + margin.left + margin.right)
+			        .attr("height", height + margin.top + margin.bottom)
+			    .append("g")
+			        .attr("transform", 
+			              "translate(" + margin.left + "," + margin.top + ")");
+
+			if( params.xScaleRange == 'time' )
+			{
+				tip.direction(function(d) 
+				{
+					//e: < June
+					//w: > Oct
+					if( d.xPos.getMonth() <= 5 )
+					{
+						return 'e';
+					}
+					else if( d.xPos.getMonth() >= 9 )
+					{
+						return 'w';
+					}
+					else
+					{
+						return 'n';
+					}
+				});
+			}
+			svg.call(tip);
+
+
+			for(var i=0; i<data.length; i++)
+			{
+				/*
+				// Scale the range of the data
+			    x.domain(d3.extent(data[i], function(d) { return d.xPos; }));
+			    if( params.yDomain )
+			    {
+			    	y.domain( params.yDomain );
+			    }
+			    else
+			    {
+			    	y.domain([0, d3.max(data[i], function(d) { return d.yPos; })]);
+			    }*/
+			       
+			    
+			    svg.selectAll('line')
+			    	.data( data[i] )
+			    	.enter().append('path')
+			    	.attr('style', function(d)
+			    	{
+			    		if( d.color )
+			        	{
+			        		return 'stroke: ' + d.color;
+			        	}	
+			        	else
+			        	{
+			        		return 'stroke: black';
+			        	}
+			    	})
+			    	.style('stroke-width', lineWidth)
+			    	.attr("d", valueline(data[i]));
+				
+
+			    if( params.skipDot == undefined )
+			    {
+				    // Add dot
+				    svg.selectAll("dot")
+				        .data(data[i])
+				      .enter().append("path")
+				        .attr("d", 
+				        	d3.svg.symbol()
+				        	.type(function(d)
+				        	{
+				        		//shape options: "circle", "cross", "diamond", "square", "triangle-down", "triangle-up"
+				        		if( d.shape )
+				        		{
+				        			return d.shape;
+				        		}	
+				        		else
+				        		{
+				        			return 'circle';
+				        		}
+				        	})
+				        	.size(function(d){
+				        		if( d.size )
+				        		{
+				        			return d.size;
+				        		}
+				        		else
+				        		{
+				        			return 50;
+				        		}	
+				        	})
+				        )
+				        .style("stroke", function(d)
+				        {
+				        	if( d.stroke )
+				        	{
+				        		return d.stroke;
+				        	}
+				        	else if( d.color )
+				        	{
+				        		return d.color;
+				        	}
+				        	else
+				        	{
+				        		return 'black';
+				        	}
+				        })
+				        .style("fill",  function(d)
+				        {
+				        	if( d.color )
+				        	{
+				        		return d.color;
+				        	}
+				        	else
+				        	{
+				        		return 'black';
+				        	}
+				        })
+	     				.attr("opacity", 1)
+				        .attr("transform", function(d) { return "translate(" + x(d.xPos) + "," + y(d.yPos) + ")"; })
+				        .on('mouseover', function(d, i)
+				        {
+				        	d.oldColor = d3.select(this).style('fill');
+				        	d3.select(this).style('fill', 'red');
+
+				        	if (d.tooltip)
+					        {
+					        	d.tooltip = formatToolTip(d.tooltip, 100);
+					        	alertMessage.innerText = d.tooltip;
+					        	
+					        	//console.log( d.tooltip.trim() );
+					        	//console.log(d)
+					        }
+
+					        tip.show(d);
+				        })
+				        .on('mouseout', function(d)
+				        {
+				        	//alertMessage.innerText = 'Hover or click dots';
+				        	d3.select(this).style('fill', d.oldColor);
+				        	tip.hide(d);
+				        })
+				        .on("click", function(d)
+					    {
+					        if (d.uri)
+					        {
+					            window.open(d.uri, '_blank');
+					        }
+					    });
+			    }
+			    
+			    // draw legend
+			    if( params.legend )
+			    {
+			    	
+			    	var lengendXpos = width;
+			    	var lengendYpos = 10;
+
+			    	if( params.legend.xPos )
+			    	{
+			    		lengendXpos = params.legend.xPos;
+			    	}
+
+			    	if( params.legend.yPos )
+			    	{
+			    		lengendYpos = params.legend.yPos;
+			    	}
+
+			    	var legend = svg.selectAll(".legend")
+				      .data(params.legend)
+				    .enter().append("g")
+				     .attr("class", "legend")
+				     .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+					 // draw legend colored rectangles
+					  legend.append("path")
+				      .attr("d", 
+				      		d3.svg.symbol().type(function(d)
+				      		{
+				      			return d.shape;
+				      		})
+				      		.size(100)
+				      )
+				      .attr("transform", function(d) { return "translate(" + lengendXpos + "," + lengendYpos + ")"; })
+				      .style("stroke", function(d)
+				      {
+				      	if( d.stroke )
+				      	{
+				      		return d.stroke;
+				      	}
+				      	else if(d.color)
+				      	{
+				      		return d.color;
+				      	}
+				      	else
+				      	{
+				      		return 'black';
+				      	}
+				      })
+				      .style("fill", function(d)
+				      {
+				      	return d.color;
+				      });
+
+					    // draw legend text
+					  legend.append("text")
+					      .attr("x", lengendXpos - 24)
+					      .attr("y", lengendYpos)
+                          .attr("zIndex", "0")
+					      .attr("dy", ".35em")
+					      .style("text-anchor", "end")
+					      .text(function(d)
+					      {
+					      	return d.class;
+					      });
+			    }
+			}
+		    
+
+		    // Add the X Axis
+		   svg.append("g")
+		        .attr("class", "x axis")
+		        .attr("transform", "translate(0," + height + ")")
+		        .call(xAxis);
+
+		    // Add the Y Axis
+		    svg.append("g")
+		        .attr("class", "y axis")
+		        .call(yAxis);
+
+		    // Add the X Axis label
+		    if( params.xAxisLabel.length != 0 )
+		    {
+		    	svg.append("g")
+			    .attr("class", "x axis")
+			    .attr("transform", "translate(0," + height + ")")
+			    .call(xAxis).append("text").attr("class", "label")
+			    .attr("x", width / 2).attr("y", 50)
+			    .style("text-anchor", "end")
+			    .text(params.xAxisLabel);
+		    }
+		    
+		    //Add title
+		    svg.append("g")
+		    .attr("class", "x axis")
+		    .attr("transform", "translate(0," + height + ")")
+		    .call(xAxis).append("text")
+		    .attr("class", "label")
+		    .attr("x", width-0.1*params.chartTitle.length)
+		    .attr("y", -(height + 20))
+		    .style("text-anchor", "end")
+		    .html(params.chartTitle);
+
+		    // Add the Y Axis label
+		    svg.append("g")
+		    .attr("class", "y axis")
+		    .call(yAxis)
+		    .append("text")
+		    .attr("class", "label")
+		    .attr("transform", "rotate(-90)")
+		    //.attr("y", 6).attr("dy", ".71em")
+		    .attr("y", -50).attr("dy", ".71em")
+		    .style("text-anchor", "end")
+		    .text(params.yAxisLabel);
+		}
+
+    </script>
+
+</body>
+</html>

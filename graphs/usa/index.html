@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-155186973-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-155186973-1');
+    </script>
+    
+    <meta charset="utf-8">
+    <title>Graph-based Story Link and Event Detection</title>
+    <link rel="stylesheet" href="/storygraph/static/style.css">
+    <link rel="stylesheet" href="/storygraph/static/pure-min.css">
+    <link rel="stylesheet" href="/storygraph/static/grids-responsive-min.css">
+</head>
+
+<!--
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+-->
+
+<script src="/storygraph/static/d3.v3.min.js"></script>
+<script src="/storygraph/static/d3.tip.v0.6.3.js"></script>
+<script src="/storygraph/static/moment.js"></script>
+<script src="/storygraph/static/gunzip.min.js"></script>
+
+<body onload="preMain()">
+
+    <br>
+
+    <div style='margin: auto;width: 95%; text-align:center; font-weight: bold;'>
+
+        <a href="/storygraph/"><span style='float:left; color:blue; cursor:pointer;'> << home &nbsp; </span></a>
+        <span onclick='showGraphDetail()' style='float:left; text-decoration: underline; color:blue; cursor:pointer;' id="graphEndpoint">
+        Graph-based Event Detection Study
+        </span>
+
+        
+
+        <span>UTC:</span>
+        <input type="date" id="graphDateLocal">
+        <span>Local:</span>
+        <select id='graphSet'></select>
+
+        <span style='float:center;' id='timestamp'></span>
+        <span id='refreshTimer' style='float:right;'></span>
+        <input id="refreshGraph" type="checkbox" checked style="float:right; margin-right: 5px; margin-top: 5px;">
+    </div>
+
+    <!--
+    <div style='margin: auto;width: 95%; text-align:center; font-weight: bold;'>
+    </div>
+    -->
+
+    <br>
+
+    <div class="flex-container">
+        <div id="visContainer" class="flex-first-child">
+          <script src="/storygraph/static/vis.js"></script>
+        </div>
+    </div>
+    
+    <div class="pure-form pure-form-stacked" style="margin:auto; width: 95%; text-align: center;">
+        <fieldset>
+            <div class="pure-g">
+
+                <div class="pure-u-1 pure-u-md-1-3">
+                    <div class="filterContainer">
+                    </div>
+                </div>                    
+
+                <!--
+                <div class="pure-u-1 pure-u-md-1-6">
+                    <input type="date" id="graphDate">
+                </div>
+                -->
+
+                <div class="pure-u-1 pure-u-md-1-6">
+                    <input id="prevButton" class="pure-button pure-button-primary" type="submit" value="<<">
+                    <input id="homeButton" class="pure-button pure-button-primary" type="submit" value="H">
+                    <input id="nextButton" class="pure-button pure-button-primary" type="submit" value=">>">
+                </div>
+
+                <div class="pure-u-1 pure-u-md-1-6">
+                    <input id="zoomInButton" class="pure-button pure-button-primary" type="submit" value="+" title="Zoom in">
+                    <input id="zoomOutButton" class="pure-button pure-button-primary" type="submit" value="-" title="Zoom out">
+                    <input id="downloadGraph" class="pure-button pure-button-primary" type="submit" value="download">
+                </div>
+
+                <div class="pure-u-1 pure-u-md-1-6">
+                    <input id="uploadGraph" class="pure-button pure-button-primary" type="file" value="upload graph">
+                </div>
+
+                <div class="pure-u-1 pure-u-md-1-3">
+                    <input id="showLabelsChkbox" type="checkbox"> <span>labels</span>
+                    <input id="showEdgeLabelsChkbox" type="checkbox"> <span>edge labels</span>
+                    <input id="stickyNodesChkbox" type="checkbox" checked> <span>sticky</span>
+                    <input id="thumbNailsChkbox" type="checkbox" checked> <span>Icon</span>
+                    <input id="annotateChkbox" type="checkbox" checked> <span>Mark</span>
+                </div>
+
+                <div class="pure-u-1 pure-u-md-1-6">
+                    <a href="https://twitter.com/intent/user?screen_name=storygraphbot" target="_blank">Follow @StoryGraphBot</a>
+                </div>
+
+                <!--
+                <div class="pure-u-1 pure-u-md-1-6">
+                    <input type="time" id="graphTime">
+                </div>
+                -->
+
+
+            </div>
+        </fieldset>
+
+    </div>
+    
+
+    <hr class="style13">
+    <div style="font-size:30px; cursor:pointer; text-align:center;" id="advBtn">ᐁ</div>
+
+</body>
+</html>

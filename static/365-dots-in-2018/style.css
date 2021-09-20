@@ -1,0 +1,123 @@
+
+body {
+      font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+      font-size: 20px;
+      margin: 0;
+      /*background-color: #EEE;*/
+}
+
+/*MENU BAR - START*/
+ul.nav {
+  list-style-type: none;
+  margin: 0;
+  overflow: hidden;
+  background-color: #000030;/*#333;*/
+}
+
+ul.nav li {
+  float: left;
+}
+
+ul.nav li a {
+  display: inline-block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  font-size: 18px;
+  text-decoration: none;
+}
+
+ul.nav li a:hover {
+  background-color: #000076;
+}
+/*MENU BAR - END*/
+
+hr.style13 {
+    height: 10px;
+    border: 0;
+    box-shadow: 0 10px 10px -10px #8c8b8b inset;
+}
+
+.background path {
+  fill: none;
+  stroke: #ddd;
+  shape-rendering: crispEdges;
+}
+
+.foreground path {
+  fill: none;
+  /*stroke: steelblue;*/
+   /*stroke-width: 1.5px;*/
+}
+
+.brush .extent {
+  fill-opacity: .3;
+  stroke: #fff;
+  shape-rendering: crispEdges;
+}
+
+.axis line,
+.axis path {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+  cursor: move;
+}
+
+/*
+circle {
+    stroke: #1f77b4;
+    fill : #1f77b4;
+    fill-opacity: .3;
+}*/
+
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip 
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+*/
+/* Style northward tooltips differently 
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+*/
+
+.gridtable{
+    width: 95%;
+    margin: 0px auto;
+    table-layout:fixed;
+    align: right;
+}
+
+.gridtable td {
+    overflow: hidden;
+    border-width: 1px;
+    padding: 8px;
+    font-size: 8px;
+    border-style: solid;
+    /*border-color: #666666;
+    background-color: #ffffff;*/
+}

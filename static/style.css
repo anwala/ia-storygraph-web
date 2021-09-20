@@ -1,0 +1,127 @@
+body {
+      font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+      font-size: 14px;
+      background-color: #EEE;
+      margin: 0;
+}
+
+svg a text{
+    cursor: pointer;
+}
+
+p.msg{
+    font-size: 20px;
+}
+
+/*MENU BAR - START*/
+ul.nav {
+  list-style-type: none;
+  margin: 0;
+  overflow: hidden;
+  background-color: #000030;/*#333;*/
+}
+
+ul.nav li {
+  float: left;
+}
+
+ul.nav li a {
+  display: inline-block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  font-size: 18px;
+  text-decoration: none;
+}
+
+ul.nav li a:hover {
+  background-color: #000076;
+}
+/*MENU BAR - END*/
+
+.flex-container {
+  display: flex;
+}
+
+.flex-first-child {
+  flex: 1;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.flex-second-child {
+  flex: 1;
+  margin-right: 10px;
+}
+
+#visContainer {
+    background-color: white;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #999999;
+    /*margin:0 auto;*/   
+    border-radius: 8px;
+}
+
+.gridtable {
+    width: 97%;
+    margin: 0px auto;
+    color: #333333;
+    border-width: 1px;
+    border-color: #129FEA;
+    border-collapse: collapse;
+}
+
+.gridtable th {
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #dedede;
+}
+
+.gridtable td {
+    text-align: left;
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #ffffff;
+}
+
+/* tip - start */
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 5px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+/* tip - end */
+
+hr.style13 {
+    height: 10px;
+    border: 0;
+    box-shadow: 0 10px 10px -10px #8c8b8b inset;
+}

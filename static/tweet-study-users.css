@@ -1,0 +1,41 @@
+body {
+    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-size: 18px;
+    background-color: #EEE;
+}
+
+/* for nodes - start */
+.link {
+    fill: none;
+    stroke: #666;
+    stroke-width: 1.5px;
+}
+
+.node circle {
+    fill: #ccc;
+    stroke: #fff;
+    stroke-width: 1.5px;
+}
+
+text {    
+    pointer-events: none;
+}
+/* for nodes - end */
+
+#charts{
+	background-color: white;
+	border-style: solid;
+	border-color: #999999;
+	border-width: 1px;
+	width: 95%;
+    margin: 0px auto;   
+}
+
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
