@@ -25,7 +25,6 @@ var max_base_node_size = 36;
 
 var globalConfig = {};
 var globalGraph = {};
-var globalSingleDayGraphs = {graphs: []};
 var globalURIParamsDict = {};
 var globalNodeKey = 'title';
 var globalMaxTitleLength = 60;
@@ -90,13 +89,13 @@ function preMain()
     if( URIParamsDict.cursor && URIParamsDict.hist && URIParamsDict.t )
     {
         console.log('\tURI REQUEST');
-        setGraphState(URIParamsDict);
-        processRequest(undefined, globalURIParamsDict);
+        setGlobalURIParamsDict(URIParamsDict);
+        processRequest(undefined, globalURIParamsDict, 0);
     }
     else
     {
         console.log('\tNOT URI REQUEST');
-        processRequest();
+        processRequest(undefined, undefined, 0);
     }
 
     refreshTimer(
@@ -105,9 +104,9 @@ function preMain()
     );
 }
 
-function setGraphState(graphDetails)
+function setGlobalURIParamsDict(graphDetails)
 {
-    console.log('\nsetGraphState()');
+    console.log('\nsetGlobalURIParamsDict()');
     for(var keyValue in graphDetails)
     {
         globalURIParamsDict[keyValue] = graphDetails[keyValue];
@@ -131,13 +130,23 @@ function setGraphState(graphDetails)
         globalURIParamsDict['cur-path'] = globalURIParamsDict['cur-path'].replace(/-/g, '/');
     }
 
+    if( globalURIParamsDict['cur-path'] )
+    {
+        let dateFrags = globalURIParamsDict['cur-path'].split('/');
+        if( dateFrags.length == 3 )
+        {
+            globalURIParamsDict['yyyy'] = dateFrags[0];
+            globalURIParamsDict['mm'] = dateFrags[1];
+            globalURIParamsDict['dd'] = dateFrags[2];
+        }
+    }
 
     globalURIParamsDict.endpoint = getEndpointFromURI();
     initURI();
     console.log('\tglobalURIParamsDict:', globalURIParamsDict);
 }
 
-function processRequest(nowDate, uriReq)
+function processRequest(nowDate, uriReq, iter)
 {   
     let endPoint = getEndpointFromURI();
     console.log('\nprocessRequest():', endPoint);
@@ -153,8 +162,7 @@ function processRequest(nowDate, uriReq)
 
     if( uriReq )
     {
-        let dateFrags = uriReq['cur-path'].split('/');
-        yyyy = dateFrags[0]; mm = dateFrags[1]; dd = dateFrags[2];
+        yyyy = uriReq.yyyy; mm = uriReq.mm; dd = uriReq.dd;
     }
     else
     {
@@ -163,114 +171,137 @@ function processRequest(nowDate, uriReq)
         dd = nowDate.getUTCDate() + ''; dd = dd.length == 1 ? '0' + dd : dd;
     }
     
+    let maxTrials = 100;
     let graphDetails = {'cur-path': yyyy + '/' + mm + '/' + dd, 'cursor': -1, 'hist': 1440};
     let usaGraph = getDownloadURIForEndPoint(endPoint, yyyy, mm, dd);
+    let usaByteOffset = getDownloadURIForEndPoint(endPoint, yyyy, mm, dd, 'menu');
+    
     document.getElementById('graphEndpoint').innerHTML = '...please wait, searching: ' + yyyy + '/' + mm + '/' + dd;
     console.log('\tusaGraph: ', usaGraph);
+    console.log('\tusaByteOffset:', usaByteOffset);
+    console.log('\tmaxTrials:', iter, 'of', maxTrials);
+    
 
-    fetch(usaGraph)
-    .then(function(response) {
+    fetch(usaByteOffset)
+    .then(function(response) 
+    {
+        if( iter == maxTrials )
+        {
+            document.getElementById('graphEndpoint').innerHTML = 'GRAPH NOT FOUND';
+            return;
+        }
+
         if(response.status !== 200 && uriReq == undefined) 
         {
             console.log('\tGraph not found');
             nowDate.setDate( nowDate.getDate() - 1 );
-            processRequest( nowDate )
+            processRequest( nowDate, undefined, iter+1 );
             return;
         }
 
-        response.arrayBuffer().then(function(data){
-            parseSGPayload(data);
+        response.text().then(function (byteOffsets) 
+        {
+            byteOffsets = byteOffsets.split('\n');
+            if( byteOffsets.length == 0 )
+            {
+                return;
+            }
+
+            if( byteOffsets[byteOffsets.length-1].trim() == '' )
+            {
+                byteOffsets.pop();
+            }
+
+            waitUntiFirstGraphLoaded(usaGraph, byteOffsets, uriReq, graphDetails);
         });
+
+       
     })
     .catch(function(err) 
     {
         console.log('\tFetch Error :-S', err);
     });
-
-    waitUntiFirstGraphLoaded(uriReq, graphDetails, 0);
 }
 
-function waitUntiFirstGraphLoaded(uriReq, graphDetails, iter)
+function waitUntiFirstGraphLoaded(locGraph, byteOffsets, uriReq, graphDetails)
 {
-    console.log('\nwaitUntiFirstGraphLoaded()', globalSingleDayGraphs.graphs.length);
-    let maxTrials = 100;
-    if( globalSingleDayGraphs.graphs.length == 0 && iter < maxTrials )
-    {
-        setTimeout(function()
-        {
-            waitUntiFirstGraphLoaded(uriReq, graphDetails, iter+1);
-        }, 1000);
+    console.log('\nwaitUntiFirstGraphLoaded()');
 
-        return;
-    }
-
-    if( iter == maxTrials )
-    {
-        document.getElementById('graphEndpoint').innerHTML = 'GRAPH NOT FOUND';
-        return;
-    }
-    
-    document.getElementById('graphEndpoint').innerHTML = 'Loaded: ' + globalSingleDayGraphs.graphs.length + ' graphs';
-    graphDetails.cursor = globalSingleDayGraphs.graphs.length-1;
-    graphDetails.hist = globalSingleDayGraphs.graphs.length;
+    graphDetails.cursor = byteOffsets.length-1;
+    graphDetails.hist = byteOffsets.length;
 
     if( uriReq )
     {
         graphDetails.cursor = uriReq.cursor == undefined ? graphDetails.cursor : uriReq.cursor;
         graphDetails.cursor = uriReq.cursor < 0 ? 0 : uriReq.cursor;
-        graphDetails.cursor = uriReq.cursor > globalSingleDayGraphs.graphs.length - 1 ? globalSingleDayGraphs.graphs.length - 1 : uriReq.cursor;
+        graphDetails.cursor = uriReq.cursor > byteOffsets.length - 1 ? byteOffsets.length - 1 : uriReq.cursor;
     }
-    setGraphState(graphDetails);
+    setGlobalURIParamsDict(graphDetails);
+    populateDropdownMenu( byteOffsets, graphDetails.cursor );
+    let byteOff = byteOffsets[graphDetails.cursor];
+    byteOff = 'bytes=' + byteOff[1] + '-' + byteOff[2];
 
-    //watch-0
-    populateGraphSet( globalSingleDayGraphs.graphs, graphDetails.cursor );
-    main( globalSingleDayGraphs.graphs[graphDetails.cursor] );
+    fetch(locGraph, {
+        headers: {
+            Range: byteOff
+        }
+    })
+    .then(function(response) 
+    {
+        if( response.status !== 206 )
+        {
+            console.log('\tGraph not found');
+            return;
+        }
+
+        response.arrayBuffer().then(function(data){
+            let graph = parseSGPayload(data);
+            //watch-0
+            main( graph );
+        });
+
+    })
+    .catch(function(err) 
+    {
+        console.log('\tFetch Error :-S', err);
+    });
 }
 
 function parseSGPayload(payload)
 {
-    console.log('\nparseSGPayload():');
-    
+    console.log('\nparseSGPayload():');    
     console.log('\tLoading bytes file');
+
     let bytes = new Uint8Array(payload, 0, payload.byteLength);
     
     console.log('\tUncompressing bytes file');
     let gunzip = new Zlib.Gunzip( bytes ); 
     let plain = gunzip.decompress();
+    let graph = '';
+    
     
     console.log('\tDone uncompressing file');
-    
-    let graph = '';
-    let lineChar = ''
-    
-    //method 2
     for (let i = 0; i < plain.length; i++) 
     {         
-        lineChar = String.fromCharCode( plain[i] );
-         
-        if( lineChar == '\n' && graph.length > 5 )
-        {
-            try 
-            {
-                graph = JSON.parse(graph);
-                globalSingleDayGraphs.graphs.push(graph);
-                graph = '';
-            } 
-            catch(e) {console.log('Graph parse error:', e);}
-        }
-        graph += lineChar;
+        graph += String.fromCharCode( plain[i] );
     }
-    
-    console.log('\tDone loading graphs:', globalSingleDayGraphs.graphs.length);
+
+    try 
+    {
+        return JSON.parse(graph);
+    } 
+    catch(e) {console.log('Graph parse error:', e);}
+
+    return {};
 }
 
 function main(graph)
 {
     console.log('\nmain():');
     document.getElementById('graphEndpoint').innerHTML = '...loading, please wait';
+    document.getElementById('uploadGraph').addEventListener('change', uploadGraphClick, false);
 
     var endpoint = getEndpointFromURI();
-    document.getElementById('uploadGraph').addEventListener('change', uploadGraphClick, false);
     var visContainer = document.getElementById('visContainer');
     visContainer.setAttribute('style', 'width: ' + widthPercent*100 + '%; height: 100%');
 
@@ -1323,30 +1354,54 @@ function advanceButton(prevOrNext)
     if( prevOrNext == 'prev' )
     {
         globalURIParamsDict.cursor--;
-        if( globalURIParamsDict.cursor < 0 )
-        {
-            globalURIParamsDict.cursor = globalURIParamsDict.hist - 1;
-        }
+        globalURIParamsDict.cursor = globalURIParamsDict.cursor < 0 ? globalURIParamsDict.hist - 1 : globalURIParamsDict.cursor;
     }
     else if( prevOrNext == 'next' )
     {
         globalURIParamsDict.cursor++;
-        if( globalURIParamsDict.cursor >= globalURIParamsDict.hist )
-        {
-            globalURIParamsDict.cursor = 0;
-        }
+        globalURIParamsDict.cursor = globalURIParamsDict.cursor >= globalURIParamsDict.hist ? globalURIParamsDict.cursor = 0 : globalURIParamsDict.cursor;
     }
 
     console.log('\tglobalURIParamsDict:', globalURIParamsDict);
+    let locGraph = getDownloadURIForEndPoint(globalURIParamsDict.endpoint, globalURIParamsDict.yyyy, globalURIParamsDict.mm, globalURIParamsDict.dd);
+    let graphSet = document.getElementById('graphSet');
 
+    if( globalURIParamsDict.cursor >= graphSet.length )
+        return;
+
+    let byteOff = graphSet[ globalURIParamsDict.cursor ].value.split(', ');
+    if( byteOff.length != 2 || locGraph == '' )
+        return;
+    byteOff = 'bytes=' + byteOff[1];
     
-    if( globalURIParamsDict.cursor < globalSingleDayGraphs.graphs.length )
+    
+    fetch(locGraph, {
+        headers: {
+            Range: byteOff
+        }
+    })
+    .then(function(response) 
     {
-        setURI(globalURIParamsDict.cursor);
-        let graphSet = document.getElementById('graphSet');
-        graphSet.selectedIndex = globalURIParamsDict.cursor;
-        main( globalSingleDayGraphs.graphs[globalURIParamsDict.cursor] );
-    }
+        if( response.status !== 206 )
+        {
+            console.log('\tGraph not found');
+            return;
+        }
+
+        response.arrayBuffer().then(function(data){
+            
+            let graph = parseSGPayload(data);
+            updateAddressCursor( globalURIParamsDict.cursor );
+            graphSet.selectedIndex = globalURIParamsDict.cursor;
+            main( graph );
+        });
+
+    })
+    .catch(function(err) 
+    {
+        console.log('\tFetch Error :-S', err);
+    });
+    
 }
 
 function downloadGraphClick()
@@ -1400,41 +1455,78 @@ function graphDateLocalChange(cursor)
 function graphSetChange()
 {
     document.getElementById('refreshGraph').checked = false;
-    let newCursor = +this.value;
-    if( newCursor < globalSingleDayGraphs.graphs.length )
+    let newCursorBytesOffset = this.value.split(', ');
+
+    if( newCursorBytesOffset.length != 2 )
+        return;
+    
+    let newCursor = +newCursorBytesOffset[0];
+    let byteOff = 'bytes=' + newCursorBytesOffset[1];
+    let locGraph = getDownloadURIForEndPoint(globalURIParamsDict.endpoint, globalURIParamsDict.yyyy, globalURIParamsDict.mm, globalURIParamsDict.dd);
+    
+    if( locGraph == '' )
+        return
+    
+    fetch(locGraph, {
+        headers: {
+            Range: byteOff
+        }
+    })
+    .then(function(response) 
     {
-        globalURIParamsDict.cursor = newCursor;    
-        setURI( globalURIParamsDict.cursor );
-        main( globalSingleDayGraphs.graphs[newCursor] );
-    }
-    //watch-3
+        if( response.status !== 206 )
+        {
+            console.log('\tGraph not found');
+            return;
+        }
+
+        response.arrayBuffer().then(function(data){
+            let graph = parseSGPayload(data);
+            //watch-3
+            globalURIParamsDict.cursor = newCursor;  
+            updateAddressCursor( globalURIParamsDict.cursor );
+            main( graph );
+        });
+
+    })
+    .catch(function(err) 
+    {
+        console.log('\tFetch Error :-S', err);
+    });
+    
 }
 
-function populateGraphSet(dayGraphs, selectedIndex)
+function populateDropdownMenu(menu, selectedIndex)
 {
     //watch-5-done
-    console.log('\npopulateGraphSet()');
+    console.log('\npopulateDropdownMenu()');
     
     let graphSet = document.getElementById('graphSet');
     graphSet.innerHTML = '';
     graphSet.onchange = graphSetChange;
 
-    for(let i = 0; i<dayGraphs.length; i++)
+    for(let i = 0; i<menu.length; i++)
     {
+        menu[i] = menu[i].split(', ');
+        
         let option = document.createElement('option');
-        option.value = i;
+        option.value = i + ', ' + menu[i][1] + '-' + menu[i][2];
+        option.text =  'T' + i + ' - ';
 
-        let localTime = dayGraphs[i].timestamp;
-        localTime = specialDateFormat(localTime);
+        let localTime = menu[i][0].trim();
+        if( localTime.length != 0 )
+        {
+            localTime = specialDateFormat(localTime);
 
-        option.text =  'T' + i + ' - ' + 
-        localTime.twelveHour + ':' + localTime.minutes + ' ' + localTime.AMPM + ' (' + 
-        localTime.weekdayName + ', ' + localTime.weekday + ' ' + localTime.monthName + ' ' + localTime.year + ')';
+            option.text += ' ' + 
+            localTime.twelveHour + ':' + localTime.minutes + ' ' + localTime.AMPM + ' (' + 
+            localTime.weekdayName + ', ' + localTime.weekday + ' ' + localTime.monthName + ' ' + localTime.year + ')';
+        }
 
         graphSet.appendChild(option);
     }
 
-    if( selectedIndex < dayGraphs.length )
+    if( selectedIndex < menu.length )
     {
         graphSet.selectedIndex = selectedIndex;
     }
@@ -1484,7 +1576,7 @@ function uploadGraphClick(evt)
             }
             else
             {
-                setGraphState( graph['graph-pointer'] );
+                setGlobalURIParamsDict( graph['graph-pointer'] );
                 main(graph);
             }
         };
@@ -1524,7 +1616,7 @@ function initURI()
     window.location.href = window.location.href.split('#')[0] + '#cursor=' + globalURIParamsDict.cursor + '&hist=' + globalURIParamsDict.hist + apFlag;
 }
 
-function setURI(graphIndexer)
+function updateAddressCursor(graphIndexer)
 {
     console.log('graphIndexer:', graphIndexer);
     
@@ -1604,11 +1696,20 @@ function getEndpointFromURI(optionalURI)
     return '/' + endPoint + '/';
 }
 
-function getDownloadURIForEndPoint(endpoint, yyyy, mm, dd)
+function getDownloadURIForEndPoint(endpoint, yyyy, mm, dd, type)
 {
+    type = type == undefined ? 'graph' : 'menu';
     if( endpoint == '/usa/' )
     {
-        return '/download/storygraph-data-usa-' + yyyy + '-' + mm + '/' + dd + '/graphs-' + yyyy + '-' + mm + '-' + dd + '.jsonl.gz';    
+        let prefix = '/storygraph/download/storygraph-data-usa-' + yyyy + '-' + mm + '/' + dd;
+        if( type == 'graph' )
+        {
+            return prefix + '/graphs-' + yyyy + '-' + mm + '-' + dd + '.jsonl.gz';
+        }
+        else if( type == 'menu' )
+        {
+            return prefix + '/byte-offsets-' + yyyy + '-' + mm + '-' + dd + '.txt';
+        }
     }
     
     return '';
