@@ -227,7 +227,7 @@ function waitUntiFirstGraphLoaded(locGraph, byteOffsets, uriReq, graphDetails)
 {
     console.log('\nwaitUntiFirstGraphLoaded()');
 
-    graphDetails.cursor = byteOffsets.length-1;
+    graphDetails.cursor = 0;
     graphDetails.hist = byteOffsets.length;
 
     if( uriReq )
@@ -236,6 +236,8 @@ function waitUntiFirstGraphLoaded(locGraph, byteOffsets, uriReq, graphDetails)
         graphDetails.cursor = uriReq.cursor < 0 ? 0 : uriReq.cursor;
         graphDetails.cursor = uriReq.cursor > byteOffsets.length - 1 ? byteOffsets.length - 1 : uriReq.cursor;
     }
+    console.log('\tcursor:', graphDetails.cursor);
+    
     setGlobalURIParamsDict(graphDetails);
     populateDropdownMenu( byteOffsets, graphDetails.cursor );
     let byteOff = byteOffsets[graphDetails.cursor];
