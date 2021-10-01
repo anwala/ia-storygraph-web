@@ -182,7 +182,11 @@ function processRequest(nowDate, uriReq, iter)
     console.log('\tmaxTrials:', iter, 'of', maxTrials);
     
 
-    fetch(usaByteOffset)
+    fetch(usaByteOffset, {
+        headers: {
+            'Cache-Control': 'no-store'
+        }
+    })
     .then(function(response) 
     {
         if( iter == maxTrials )
@@ -227,7 +231,7 @@ function waitUntiFirstGraphLoaded(locGraph, byteOffsets, uriReq, graphDetails)
 {
     console.log('\nwaitUntiFirstGraphLoaded()');
 
-    graphDetails.cursor = 0;
+    graphDetails.cursor = byteOffsets.length - 1;
     graphDetails.hist = byteOffsets.length;
 
     if( uriReq )
