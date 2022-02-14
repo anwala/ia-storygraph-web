@@ -288,7 +288,7 @@ function parseSGPayload(payload)
     
     console.log('\tDone uncompressing file');
     for (let i = 0; i < plain.length; i++) 
-    {         
+    {  
         graph += String.fromCharCode( plain[i] );
     }
 
@@ -1393,7 +1393,7 @@ function advanceButton(prevOrNext)
             console.log('\tGraph not found');
             return;
         }
-
+        
         response.arrayBuffer().then(function(data){
             
             let graph = parseSGPayload(data);
@@ -1737,9 +1737,17 @@ function formatGraph(graph)
     {
         for(var i = 0; i<graph.links.length; i++)
         {
-            graph.links[i].label = graph.links[i].rank + ' (' + graph.links[i].sim + ')';
-            graph.links[i]['label-description'] = 'rank (sim)';
-
+            if( graph.links[i].label )
+            {
+                continue;
+            }
+            
+            if( graph.links[i].rank && graph.links[i].sim )
+            {
+                graph.links[i].label = graph.links[i].rank + ' (' + graph.links[i].sim + ')';
+                graph.links[i]['label-description'] = 'rank (sim)';
+            }
+            
         }
     }
 
