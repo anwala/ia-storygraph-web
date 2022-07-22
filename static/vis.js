@@ -44,7 +44,7 @@ function preMain()
 
     if( window.navigator.userAgent.indexOf('Chrome/') == -1 )
     {
-        alert('Sorry, StoryGraph is not currently supported your Browser. Please use Google Chrome.');
+        alert('Sorry, StoryGraph is not currently supported by your Browser. Please use Google Chrome.');
     }
     
     //settings - start
