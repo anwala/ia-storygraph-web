@@ -41,6 +41,11 @@ var globalStoryGraphFilename = '';
 function preMain()
 {   
     console.log('\npreMain():');
+
+    if( window.navigator.userAgent.indexOf('Chrome/') == -1 )
+    {
+        alert('Sorry, StoryGraph is not currently supported your Browser. Please use Google Chrome.');
+    }
     
     //settings - start
     document.getElementById('zoomInButton').onclick = function()
@@ -182,11 +187,7 @@ function processRequest(nowDate, uriReq, iter)
     console.log('\tmaxTrials:', iter, 'of', maxTrials);
     
 
-    fetch(usaByteOffset, {
-        headers: {
-            'Cache-Control': 'no-store'
-        }
-    })
+    fetch(usaByteOffset)
     .then(function(response) 
     {
         if( iter == maxTrials )
@@ -1704,10 +1705,21 @@ function getEndpointFromURI(optionalURI)
 
 function getDownloadURIForEndPoint(endpoint, yyyy, mm, dd, type)
 {
+    /*
+        Old:
+        https://web.archive.org/storygraph/download/storygraph-data-usa-2022-07/21/byte-offsets-2022-07-21.txt
+        https://web.archive.org/storygraph/download/storygraph-data-usa-2022-07/21/graphs-2022-07-21.jsonl.gz
+
+        New:
+        https://archive.org/download/storygraph-data-usa-2022-07/21/byte-offsets-2022-07-21.txt
+        https://archive.org/download/storygraph-data-usa-2022-07/21/graphs-2022-07-21.jsonl.gz
+    */
     type = type == undefined ? 'graph' : 'menu';
     if( endpoint == '/usa/' )
     {
-        let prefix = '/storygraph/download/storygraph-data-usa-' + yyyy + '-' + mm + '/' + dd;
+        //Old: let prefix = '/storygraph/download/storygraph-data-usa-' + yyyy + '-' + mm + '/' + dd;
+        //New:
+        let prefix = 'https://archive.org/download/storygraph-data-usa-' + yyyy + '-' + mm + '/' + dd;
         if( type == 'graph' )
         {
             return prefix + '/graphs-' + yyyy + '-' + mm + '-' + dd + '.jsonl.gz';
