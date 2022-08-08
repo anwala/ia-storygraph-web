@@ -41,11 +41,6 @@ var globalStoryGraphFilename = '';
 function preMain()
 {   
     console.log('\npreMain():');
-
-    if( window.navigator.userAgent.indexOf('Chrome/') == -1 )
-    {
-        alert('Sorry, StoryGraph is not currently supported by your Browser. Please use Google Chrome.');
-    }
     
     //settings - start
     document.getElementById('zoomInButton').onclick = function()
@@ -187,9 +182,14 @@ function processRequest(nowDate, uriReq, iter)
     console.log('\tmaxTrials:', iter, 'of', maxTrials);
     
 
-    fetch(usaByteOffset)
+    fetch(usaByteOffset, {
+        headers: {
+            'Cache-Control': 'no-store'
+        }
+    })
     .then(function(response) 
     {
+        console.log('kpmp');
         if( iter == maxTrials )
         {
             document.getElementById('graphEndpoint').innerHTML = 'GRAPH NOT FOUND';
