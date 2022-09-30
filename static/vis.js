@@ -180,7 +180,7 @@ function processRequest(nowDate, uriReq, iter)
     console.log('\tusaGraph: ', usaGraph);
     console.log('\tusaByteOffset:', usaByteOffset);
     console.log('\tmaxTrials:', iter, 'of', maxTrials);
-    
+
 
     fetch(usaByteOffset, {
         headers: {
@@ -189,7 +189,6 @@ function processRequest(nowDate, uriReq, iter)
     })
     .then(function(response) 
     {
-        console.log('kpmp');
         if( iter == maxTrials )
         {
             document.getElementById('graphEndpoint').innerHTML = 'GRAPH NOT FOUND';
@@ -217,18 +216,27 @@ function processRequest(nowDate, uriReq, iter)
                 byteOffsets.pop();
             }
 
-            waitUntiFirstGraphLoaded(usaGraph, byteOffsets, uriReq, graphDetails);
+            waitUntiFirstGraphLoaded(nowDate, usaGraph, byteOffsets, uriReq, graphDetails);
         });
 
-       
     })
     .catch(function(err) 
     {
-        console.log('\tFetch Error :-S', err);
+        console.log('\tFetch Error (for bytes offset) :-S', err);
+        if( iter <= maxTrials )
+        {
+            nowDate.setDate( nowDate.getDate() - 1 );
+            processRequest( nowDate, undefined, iter+1 );
+        }
+        else
+        {
+            document.getElementById('graphEndpoint').innerHTML = 'GRAPH NOT FOUND';
+            return;
+        }
     });
 }
 
-function waitUntiFirstGraphLoaded(locGraph, byteOffsets, uriReq, graphDetails)
+function waitUntiFirstGraphLoaded(nowDate, locGraph, byteOffsets, uriReq, graphDetails)
 {
     console.log('\nwaitUntiFirstGraphLoaded()');
 
@@ -247,6 +255,7 @@ function waitUntiFirstGraphLoaded(locGraph, byteOffsets, uriReq, graphDetails)
     populateDropdownMenu( byteOffsets, graphDetails.cursor );
     let byteOff = byteOffsets[graphDetails.cursor];
     byteOff = 'bytes=' + byteOff[1] + '-' + byteOff[2];
+
 
     fetch(locGraph, {
         headers: {
@@ -270,7 +279,9 @@ function waitUntiFirstGraphLoaded(locGraph, byteOffsets, uriReq, graphDetails)
     })
     .catch(function(err) 
     {
-        console.log('\tFetch Error :-S', err);
+        console.log('\tFetch Error (for graphs json) :-S', err);
+        nowDate.setDate( nowDate.getDate() - 1 );
+        processRequest( nowDate, undefined, 0 );
     });
 }
 
