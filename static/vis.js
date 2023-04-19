@@ -2074,9 +2074,8 @@ function refreshTimer(refreshSeconds, maxRefreshSeconds)
 
             if( refreshSeconds < 0 )
             {
-                graphDateLocalChange(1000);
-                //processRequest();
-                //refreshTimer(maxRefreshSeconds, maxRefreshSeconds);
+                //graphDateLocalChange(1000);
+                homeButtonClick();
             }
             else
             {
